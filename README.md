@@ -1,2 +1,2 @@
 # Fitting_Room_Manager
-Notifies if a piece of clothing enters and/or leaves the fitting room by reading the respective RFID tag
+Notifies if pieces of clothing enter or leave the fitting room by reading their respective RFID tag
