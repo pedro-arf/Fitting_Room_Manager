@@ -33,7 +33,7 @@
 
 // Authorized Email and Corresponding Password
 #define USER_EMAIL "pedro30.arf@gmail.com"
-#define USER_PASSWORD "NwYXfYK8zbcNiAx"
+#define USER_PASSWORD "frmanager2022"
 
 // RTDB URLefine the RTDB URL
 #define DATABASE_URL "https://fitting-room-manager-default-rtdb.europe-west1.firebasedatabase.app/"

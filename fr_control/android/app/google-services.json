@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "675136926988",
+    "firebase_url": "https://fitting-room-manager-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "fitting-room-manager",
+    "storage_bucket": "fitting-room-manager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:675136926988:android:31d68bdea0343659d10529",
+        "android_client_info": {
+          "package_name": "com.example.fr_control"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "675136926988-j8niakesodtgroattvnqpihte05l0g02.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD475Rs62ktrazu4iL7URJdOmej4uhBEsY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "675136926988-j8niakesodtgroattvnqpihte05l0g02.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
