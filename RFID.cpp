@@ -28,8 +28,9 @@
 #define RST_PIN   4     // Configurable, see typical pin layout above
 #define SS_PIN    5    // Configurable, see typical pin layout above
 
-// Firebase project API Key
+// Firebase project API Key and project ID
 #define API_KEY "AIzaSyA4lUrWmolLy7TReQt3XLjsCE_o_kWFpto"
+#define FIREBASE_PROJECT_ID "fitting-room-manager"
 
 // Authorized Email and Corresponding Password
 #define USER_EMAIL "pedro30.arf@gmail.com"
@@ -90,22 +91,30 @@ void initComs() {
 
 }
 
-// Send item data to Firebase
-void sendData(String path, String value, String tagID){
-  if (Firebase.RTDB.setString(&fbdo, path.c_str(), value))
-  {
-    if (value == "OUT") {
-      Serial.println("Item " + tag + " left Fitting Room.");
-    }
-    else {
-      Serial.println("Item " + tag + " entered Fitting Room.");
-    }
+// Send tag and status data to Firebase
+void sendData(String path, String value){
+  
+  FirebaseJson content;
+
+  Serial.println(value);
+
+  content.set("fields/Status/stringValue", value.c_str());
+
+  // Updates status if tag is already in the database
+  if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", path.c_str(), content.raw(), "")){
+    Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
   }
-  else{
-    Serial.println("ERROR");
+  else {
     Serial.println(fbdo.errorReason());
   }
-  
+
+  // Adds tag and status to the database if it doesn´t exist
+  if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", path.c_str(), content.raw())){
+    Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+  }
+  else {
+    Serial.println(fbdo.errorReason());
+  }  
 }
 
 void setup() {
@@ -150,9 +159,6 @@ void setup() {
   Serial.print("User UID: ");
   Serial.println(uid);
 
-  // Update database path
-  databasePath = "/UsersData/" + uid;
-
  }
 
 void loop() {
@@ -168,35 +174,35 @@ void loop() {
   Serial.println("Tag: " + tag);
 
   // Update database path with MFRC522 readings
-  tagPath = databasePath + "/tags/" + tag; // UsersData/<user_uid>/tags
+  tagPath = "tags/" + tag; // tags/<tag_id>
 
   // Variables to store item status
-  String currentStatus, status = "IN";
+  String status = "IN";
 
-  // Retrieves item current status from database
-  if (Firebase.ready()){
-    if (Firebase.RTDB.getString(&fbdo, tagPath)) {
-      if (fbdo.dataType() == "string") {
-        currentStatus = fbdo.stringData();
-      }
-    }
-    else {
-      String error = fbdo.errorReason();
-      if (error == "path not exist") {
-        currentStatus = "OUT"; // If tag path was not yet registered, sets item current status to "OUT"
-      }
-      else {
-        return;
-      }
-    }
-  
-  if (currentStatus == "IN") {
-    status = "OUT";
-  }
-    // Send data to Firebase
-    sendData(tagPath, status, tag);
-  }
 
+  // Gets tag status info from Firestore database
+  Serial.print("Search for document... ");
+  if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
+    Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+
+    // Create a FirebaseJson object and set content with received payload
+    FirebaseJson payload;
+    payload.setJsonData(fbdo.payload().c_str());
+
+    // Get the data from FirebaseJson object 
+    FirebaseJsonData jsonData;
+    payload.get(jsonData, "fields/Status/stringValue", true);
+    Serial.println(jsonData.stringValue);
+    
+    // Updates status variable if tag is in the Fitting Room
+    if(jsonData.stringValue == "IN"){
+      status = "OUT";
+    }
+  } else {
+    Serial.println(fbdo.errorReason());
+  }
+  // Send data to Firestore
+  sendData(tagPath, status);
 
   delay(500);
   rfid.PICC_HaltA();          // Stop MFRC522 from reading
@@ -206,4 +212,5 @@ void loop() {
 }
 }
 
+ 
  
