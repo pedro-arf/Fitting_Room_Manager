@@ -48,7 +48,6 @@ FirebaseConfig config;
 String uid;
 
 // Variables to save database paths
-String databasePath;
 String tagPath;
 
 // Varaible to save tag ID
@@ -92,7 +91,7 @@ void initComs() {
 }
 
 // Send tag and status data to Firebase
-void sendData(String path, String value){
+void sendData(String value){
   
   FirebaseJson content;
 
@@ -101,7 +100,7 @@ void sendData(String path, String value){
   content.set("fields/Status/stringValue", value.c_str());
 
   // Updates status if tag is already in the database
-  if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", path.c_str(), content.raw(), "")){
+  if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), content.raw(), "")){
     Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
   }
   else {
@@ -109,7 +108,7 @@ void sendData(String path, String value){
   }
 
   // Adds tag and status to the database if it doesn´t exist
-  if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", path.c_str(), content.raw())){
+  if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), content.raw())){
     Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
   }
   else {
@@ -179,30 +178,32 @@ void loop() {
   // Variables to store item status
   String status = "IN";
 
+  if (Firebase.ready()) {
+    // Gets tag status info from Firestore database
+    Serial.print("Search for document... ");
+    if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
+      Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
 
-  // Gets tag status info from Firestore database
-  Serial.print("Search for document... ");
-  if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
-    Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+      // Create a FirebaseJson object and set content with received payload
+      FirebaseJson payload;
+      payload.setJsonData(fbdo.payload().c_str());
 
-    // Create a FirebaseJson object and set content with received payload
-    FirebaseJson payload;
-    payload.setJsonData(fbdo.payload().c_str());
-
-    // Get the data from FirebaseJson object 
-    FirebaseJsonData jsonData;
-    payload.get(jsonData, "fields/Status/stringValue", true);
-    Serial.println(jsonData.stringValue);
-    
-    // Updates status variable if tag is in the Fitting Room
-    if(jsonData.stringValue == "IN"){
-      status = "OUT";
+      // Get the data from FirebaseJson object 
+      FirebaseJsonData jsonData;
+      payload.get(jsonData, "fields/Status/stringValue", true);
+      Serial.println(jsonData.stringValue);
+      
+      // Updates status variable if tag is in the Fitting Room
+      if(jsonData.stringValue == "IN"){
+        status = "OUT";
+      }
+    } else {
+      Serial.println(fbdo.errorReason());
     }
-  } else {
-    Serial.println(fbdo.errorReason());
+
+    // Send data to Firestore
+    sendData(status);
   }
-  // Send data to Firestore
-  sendData(tagPath, status);
 
   delay(500);
   rfid.PICC_HaltA();          // Stop MFRC522 from reading
