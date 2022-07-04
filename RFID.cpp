@@ -61,6 +61,38 @@ MFRC522::MIFARE_Key key;
 const char* ssid     = "Main";
 const char* password = "Ferreira93";
 
+// Tag Mock Info
+typedef struct tagData
+{
+    double price;
+    String size;
+    String description;
+    String imageUrl;
+}data;
+
+data tagInfo(String tagId) {
+
+    data item;
+
+    // tag 1
+    if (tagId == "601001057") {
+      item.price = 25.99;
+      item.size = "XS";
+      item.description = "Oversize Linen Shirt";
+      item.imageUrl = "https://i.imgur.com/ohVNFiM.jpg"; 
+    }
+
+    // tag 2
+    if (tagId == "3521021") {
+      item.price = 20.00;
+      item.size = "S";
+      item.description = "ZW The Cut Off";
+      item.imageUrl = "https://i.imgur.com/ohVNFiM.jpg";
+    }
+
+    return item;
+}
+
 // Initialize Wifi
 void initWifi() {
 
@@ -90,14 +122,19 @@ void initComs() {
 
 }
 
-// Send tag and status data to Firebase
-void sendData(String value){
+// Send tag data to Firebase
+void sendData(String tag, String value){
   
   FirebaseJson content;
 
-  Serial.println(value);
+  data item = tagInfo(tag);
 
+  // Prepare tag info
   content.set("fields/Status/stringValue", value.c_str());
+  content.set("fields/Description/stringValue", item.description.c_str());
+  content.set("fields/Size/stringValue", item.size.c_str());
+  content.set("fields/Price/doubleValue", item.price);
+  content.set("fields/Image URL/stringValue", item.imageUrl.c_str());  
 
   // Updates status if tag is already in the database
   if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), content.raw(), "")){
@@ -107,7 +144,7 @@ void sendData(String value){
     Serial.println(fbdo.errorReason());
   }
 
-  // Adds tag and status to the database if it doesn´t exist
+  // Adds tag to the database if it doesn´t exist
   if(Firebase.Firestore.createDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), content.raw())){
     Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
   }
@@ -191,18 +228,21 @@ void loop() {
       // Get the data from FirebaseJson object 
       FirebaseJsonData jsonData;
       payload.get(jsonData, "fields/Status/stringValue", true);
-      Serial.println(jsonData.stringValue);
       
-      // Updates status variable if tag is in the Fitting Room
+      // Deletes tag if it is already in the Fitting Room
       if(jsonData.stringValue == "IN"){
         status = "OUT";
+        Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "");
+        delay(1000);
       }
     } else {
       Serial.println(fbdo.errorReason());
     }
 
     // Send data to Firestore
-    sendData(status);
+    if (status == "IN"){
+      sendData(tag, status);
+    }
   }
 
   delay(500);
