@@ -87,7 +87,7 @@ data tagInfo(String tagId) {
       item.price = 20.00;
       item.size = "S";
       item.description = "ZW The Cut Off";
-      item.imageUrl = "https://i.imgur.com/ohVNFiM.jpg";
+      item.imageUrl = "https://i.imgur.com/E3z53i4.jpg";
     }
 
     return item;
