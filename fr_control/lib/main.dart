@@ -5,9 +5,12 @@ import 'package:fr_control/views/home_page.dart';
 import 'package:fr_control/views/login_view.dart';
 import 'package:fr_control/views/register_view.dart';
 import 'package:fr_control/views/verify_email_view.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
