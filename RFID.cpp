@@ -19,6 +19,8 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <iostream>
+#include <time.h>
+#include <ESPDateTime.h>
 
 // Token generation process info.
 #include "addons/TokenHelper.h"
@@ -68,18 +70,21 @@ typedef struct tagData
     String size;
     String description;
     String imageUrl;
+    String timeCreated;
 }data;
 
 data tagInfo(String tagId) {
 
     data item;
+    DateTime.now();
 
     // tag 1
     if (tagId == "601001057") {
       item.price = 25.99;
       item.size = "XS";
       item.description = "Oversize Linen Shirt";
-      item.imageUrl = "https://i.imgur.com/ohVNFiM.jpg"; 
+      item.imageUrl = "https://i.imgur.com/ohVNFiM.jpg";
+      item.timeCreated = DateTime.toString();  
     }
 
     // tag 2
@@ -88,6 +93,7 @@ data tagInfo(String tagId) {
       item.size = "S";
       item.description = "ZW The Cut Off";
       item.imageUrl = "https://i.imgur.com/E3z53i4.jpg";
+      item.timeCreated = DateTime.toString(); 
     }
 
     return item;
@@ -122,6 +128,15 @@ void initComs() {
 
 }
 
+void setupDateTime() {
+  DateTime.setTimeZone("UTC-1");
+  DateTime.setServer("pt.pool.ntp.org");
+  DateTime.begin();
+  if (!DateTime.isTimeValid()) {
+    Serial.println("Failed to get time from server.");
+  }
+}
+
 // Send tag data to Firebase
 void sendData(String tag, String value){
   
@@ -134,7 +149,8 @@ void sendData(String tag, String value){
   content.set("fields/Description/stringValue", item.description.c_str());
   content.set("fields/Size/stringValue", item.size.c_str());
   content.set("fields/Price/doubleValue", item.price);
-  content.set("fields/Image URL/stringValue", item.imageUrl.c_str());  
+  content.set("fields/Image URL/stringValue", item.imageUrl.c_str());
+  content.set("fields/Time/stringValue", item.timeCreated.c_str());   
 
   // Updates status if tag is already in the database
   if(Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), content.raw(), "")){
@@ -161,6 +177,10 @@ void setup() {
   // Initialize Wifi and MFRC522
   initWifi();
   initComs();
+
+  // Initialize time server
+  setupDateTime();
+  
 
   // Assign API key
   config.api_key = API_KEY;
@@ -215,7 +235,7 @@ void loop() {
   // Variables to store item status
   String status = "IN";
 
-  if (Firebase.ready()) {
+  if (Firebase.ready() && DateTime.isTimeValid()) {
     // Gets tag status info from Firestore database
     Serial.print("Search for document... ");
     if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
@@ -252,6 +272,3 @@ void loop() {
   
 }
 }
-
- 
- 
