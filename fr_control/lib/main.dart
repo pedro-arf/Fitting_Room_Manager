@@ -21,7 +21,8 @@ Future<void> main() async {
             cursorColor: Colors.black,
             selectionHandleColor: Colors.black,
             selectionColor: Colors.grey[300],
-          )),
+          ),
+          colorScheme: ColorScheme.fromSwatch(accentColor: Colors.white)),
       home: const HomePage(),
       routes: {
         loginRoute: (context) => const LoginView(),

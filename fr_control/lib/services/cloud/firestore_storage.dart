@@ -7,6 +7,7 @@ const tagPrice = 'Price';
 const tagDescription = 'Description';
 const tagSize = 'Size';
 const tagUrl = 'Image URL';
+const tagTime = 'Time';
 
 @immutable
 class FirestoreTag {
@@ -16,13 +17,15 @@ class FirestoreTag {
   final String description;
   final String size;
   final String imgUrl;
+  final String timeCreated;
 
   const FirestoreTag(
     this.status,
     this.price,
     this.description,
     this.size,
-    this.imgUrl, {
+    this.imgUrl,
+    this.timeCreated, {
     required this.tagId,
   });
 
@@ -33,11 +36,12 @@ class FirestoreTag {
         price = snapshot.data()[tagPrice] as double,
         description = snapshot.data()[tagDescription] as String,
         size = snapshot.data()[tagSize] as String,
-        imgUrl = snapshot.data()[tagUrl] as String;
+        imgUrl = snapshot.data()[tagUrl] as String,
+        timeCreated = snapshot.data()[tagTime] as String;
 }
 
 class FirestoreStorage {
-  final tags = FirebaseFirestore.instance.collection('tags');
+  final tags = FirebaseFirestore.instance.collection('tags').orderBy("Time");
 
   // Listen for tags in real time
   Stream<Iterable<FirestoreTag>> allTags() => tags

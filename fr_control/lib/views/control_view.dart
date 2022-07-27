@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fr_control/constants/routes.dart';
 import 'package:fr_control/services/auth/auth_service.dart';
 import 'package:fr_control/services/cloud/firestore_storage.dart';
+import 'package:fr_control/views/control_list_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../enums/menu_action.dart';
 
@@ -25,8 +26,6 @@ class _ControlViewState extends State<ControlView> {
 
   @override
   Widget build(BuildContext context) {
-    var screenSizing = MediaQuery.of(context).size;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -91,74 +90,30 @@ class _ControlViewState extends State<ControlView> {
                         if (snapshot.hasData) {
                           final allTags =
                               snapshot.data as Iterable<FirestoreTag>;
-                          return Column(
-                            children: [
-                              Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 25),
-                                  child: Text(
-                                    (() {
-                                      if (allTags.length == 1) {
-                                        return "${allTags.length.toString()} piece";
-                                      }
-                                      return "${allTags.length.toString()} pieces";
-                                    })(),
-                                    style: GoogleFonts.bebasNeue(fontSize: 30),
-                                  )),
-                              SizedBox(
-                                height: 450,
-                                child: ListView.builder(
-                                  itemCount: allTags.length,
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) {
-                                    final tag = allTags.elementAt(index);
-                                    return Column(
-                                      children: [
-                                        const SizedBox(
-                                          height: 50,
-                                        ),
-                                        Text(
-                                          tag.description,
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                        Container(
-                                          width: screenSizing.width,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 80),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: Image.network(
-                                              tag.imgUrl,
-                                            ),
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Size: ${tag.size}",
-                                              style:
-                                                  const TextStyle(fontSize: 15),
-                                            ),
-                                            const SizedBox(
-                                              width: 90,
-                                            ),
-                                            Text("Price: \$${tag.price}",
-                                                style: const TextStyle(
-                                                    fontSize: 15)),
-                                          ],
-                                        ),
-                                      ],
-                                    );
-                                  },
+                          return SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 25),
+                                    child: Text(
+                                      (() {
+                                        if (allTags.length == 1) {
+                                          return "${allTags.length.toString()} item";
+                                        }
+                                        return "${allTags.length.toString()} items";
+                                      })(),
+                                      style:
+                                          GoogleFonts.bebasNeue(fontSize: 30),
+                                    )),
+                                SizedBox(
+                                  height: 600,
+                                  child: ControlListView(
+                                    tags: allTags,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         } else {
                           return const CircularProgressIndicator();

@@ -3,5 +3,3 @@ class FirestoreStorageException implements Exception {
 }
 
 class CouldNotGetAllTagsException extends FirestoreStorageException {}
-
-class CouldNotDeleteTagException extends FirestoreStorageException {}
