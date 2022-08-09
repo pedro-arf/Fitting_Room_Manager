@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 
@@ -28,9 +26,11 @@ class _TimerViewState extends State<TimerView> {
 
   void startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
-        const Duration();
-      });
+      if (mounted) {
+        setState(() {
+          const Duration();
+        });
+      }
     });
   }
 
@@ -55,12 +55,12 @@ class _TimerViewState extends State<TimerView> {
     final minutes = twoDigits(diff.inMinutes.remainder(60));
     final seconds = twoDigits(diff.inSeconds.remainder(60));
 
-    if (diff.inHours >= 24) {
+    /* if (diff.inHours >= 24) {
       return const Text(
         'Please, check the fitting room.',
         style: TextStyle(fontSize: 18),
       );
-    }
+    } */
 
     if ((minutes == '30' && seconds == '00') ||
         (diff.inHours > 0 && minutes == '00' && seconds == '00')) {

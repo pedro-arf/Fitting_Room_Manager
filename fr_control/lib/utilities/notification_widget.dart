@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'dart:math';
+
+int id = 1;
 
 class NotificationWidget {
   static final _notifications = FlutterLocalNotificationsPlugin();
@@ -14,21 +15,21 @@ class NotificationWidget {
   }
 
   static Future showNotification({
-    var id = 0,
     var title,
     var body,
     var payload,
-  }) async =>
-      _notifications.show(id, title, body, await notificationDetails());
+  }) async {
+    id += 1;
+    _notifications.show(id, title, body, await notificationDetails());
+  }
 
   static notificationDetails() async {
-    var id = Random();
-    return NotificationDetails(
+    return const NotificationDetails(
         android: AndroidNotificationDetails(
           'channel id 2',
           'channel name',
           importance: Importance.max,
-          styleInformation: const BigTextStyleInformation(''),
+          styleInformation: BigTextStyleInformation(''),
         ),
         iOS: IOSNotificationDetails());
   }
