@@ -68,7 +68,10 @@ class ControlListView extends StatelessWidget {
             const SizedBox(
               height: 45,
             ),
-            TimerView(timeCreated: tag.timeCreated),
+            TimerView(
+              timeCreated: tag.timeCreated,
+              itemDescription: tag.description,
+            ),
           ],
         );
       },

@@ -1,9 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'dart:async';
 
+import 'package:fr_control/utilities/notification_widget.dart';
+
 class TimerView extends StatefulWidget {
-  const TimerView({Key? key, required this.timeCreated}) : super(key: key);
+  const TimerView(
+      {Key? key, required this.timeCreated, required this.itemDescription})
+      : super(key: key);
   final String timeCreated;
+  final String itemDescription;
 
   @override
   State<TimerView> createState() => _TimerViewState();
@@ -15,7 +22,7 @@ class _TimerViewState extends State<TimerView> {
   @override
   void initState() {
     super.initState();
-
+    NotificationWidget.init();
     startTimer();
   }
 
@@ -53,6 +60,14 @@ class _TimerViewState extends State<TimerView> {
         'Please, check the fitting room.',
         style: TextStyle(fontSize: 18),
       );
+    }
+
+    if ((minutes == '30' && seconds == '00') ||
+        (diff.inHours > 0 && minutes == '00' && seconds == '00')) {
+      NotificationWidget.showNotification(
+          title: 'Alert',
+          body:
+              'The item "${widget.itemDescription}" has been in the fitting room for too long.\nPlease, check the fitting room.');
     }
 
     return Text(
