@@ -48,12 +48,9 @@ class _LoginViewState extends State<LoginView> {
               children: [
                 // App Icon
 
-                const Icon(
-                  Icons.thumbs_up_down_sharp,
-                  size: 100,
-                ),
+                const Image(image: AssetImage('assets/logo.png')),
                 const SizedBox(
-                  height: 75,
+                  height: 20,
                 ),
 
                 // Login Message

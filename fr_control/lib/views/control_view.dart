@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:fr_control/constants/routes.dart';
 import 'package:fr_control/services/auth/auth_service.dart';
 import 'package:fr_control/services/cloud/firestore_storage.dart';
 import 'package:fr_control/views/control_list_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../enums/menu_action.dart';
 
 class ControlView extends StatefulWidget {
@@ -13,16 +15,50 @@ class ControlView extends StatefulWidget {
   State<ControlView> createState() => _ControlViewState();
 }
 
-class _ControlViewState extends State<ControlView> {
+class _ControlViewState extends State<ControlView> with WidgetsBindingObserver {
+  AppLifecycleState appLifecycleState = AppLifecycleState.detached;
   late final FirestoreStorage _tagManager;
+  var appBarHeight = AppBar().preferredSize.height;
 
   @override
   void initState() {
     _tagManager = FirestoreStorage();
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
   }
 
-  var appBarHeight = AppBar().preferredSize.height;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    var appState = 'detached';
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        appState = 'resumed';
+        setState(appState);
+        print("app in resumed");
+        break;
+      case AppLifecycleState.inactive:
+        appState = 'inactive';
+        setState(appState);
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        appState = 'paused';
+        setState(appState);
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        setState(appState);
+        print("app in detached");
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +109,11 @@ class _ControlViewState extends State<ControlView> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              padding: const EdgeInsets.symmetric(horizontal: 37),
               child: Text(
                 "Currently in the Fitting Room...",
                 style: GoogleFonts.bebasNeue(fontSize: 35),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 50),
@@ -91,8 +128,8 @@ class _ControlViewState extends State<ControlView> {
                           final allTags =
                               snapshot.data as Iterable<FirestoreTag>;
                           return SingleChildScrollView(
-                            child: Column(
-                              children: [
+                            child: Column(children: [
+                              if (allTags.isNotEmpty) ...[
                                 Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 25),
@@ -100,6 +137,8 @@ class _ControlViewState extends State<ControlView> {
                                       (() {
                                         if (allTags.length == 1) {
                                           return "${allTags.length.toString()} item";
+                                        } else if (allTags.isEmpty) {
+                                          return "";
                                         }
                                         return "${allTags.length.toString()} items";
                                       })(),
@@ -112,14 +151,43 @@ class _ControlViewState extends State<ControlView> {
                                     tags: allTags,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ] else ...[
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 100),
+                                  child: Column(
+                                    children: [
+                                      const Icon(
+                                        Icons.check,
+                                        size: 200,
+                                      ),
+                                      Text(
+                                        "No items",
+                                        style:
+                                            GoogleFonts.bebasNeue(fontSize: 30),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ]
+                            ]),
                           );
                         } else {
-                          return const CircularProgressIndicator();
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.black),
+                            ),
+                          );
                         }
                       default:
-                        return const CircularProgressIndicator();
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.black),
+                          ),
+                        );
                     }
                   }),
             ),
@@ -160,4 +228,10 @@ Future<bool> showLogOutDialog(BuildContext context) {
       );
     },
   ).then((value) => value ?? false); // ou retorna o showDialog ou retorna falso
+}
+
+void setState(state) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.reload();
+  prefs.setString('state', state);
 }

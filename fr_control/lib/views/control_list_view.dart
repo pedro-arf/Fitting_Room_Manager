@@ -23,7 +23,7 @@ class ControlListView extends StatelessWidget {
         return Column(
           children: [
             const SizedBox(
-              height: 50,
+              height: 45,
             ),
             Text(
               tag.description,
@@ -66,7 +66,7 @@ class ControlListView extends StatelessWidget {
               ],
             ),
             const SizedBox(
-              height: 45,
+              height: 35,
             ),
             TimerView(
               timeCreated: tag.timeCreated,

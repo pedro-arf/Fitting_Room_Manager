@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fr_control/constants/routes.dart';
+import 'package:fr_control/services/background/background_service.dart';
 import 'package:fr_control/views/control_view.dart';
 import 'package:fr_control/views/home_page.dart';
 import 'package:fr_control/views/login_view.dart';
@@ -9,6 +11,8 @@ import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initializeBackgroundService();
+  FlutterNativeSplash.removeAfter(initialization);
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(
@@ -32,4 +36,8 @@ Future<void> main() async {
       },
     ),
   );
+}
+
+Future initialization(BuildContext? context) async {
+  await Future.delayed(const Duration(seconds: 3));
 }

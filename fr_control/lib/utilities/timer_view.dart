@@ -55,12 +55,27 @@ class _TimerViewState extends State<TimerView> {
     final minutes = twoDigits(diff.inMinutes.remainder(60));
     final seconds = twoDigits(diff.inSeconds.remainder(60));
 
-    /* if (diff.inHours >= 24) {
-      return const Text(
-        'Please, check the fitting room.',
-        style: TextStyle(fontSize: 18),
+    if (diff.inHours >= 24) {
+      return Center(
+        child: Column(
+          children: const [
+            Text(
+              'Check the fitting room!',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'This item has been in there for too long',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
-    } */
+    }
 
     if ((minutes == '30' && seconds == '00') ||
         (diff.inHours > 0 && minutes == '00' && seconds == '00')) {
