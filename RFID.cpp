@@ -27,8 +27,8 @@
 // RTDB payload printing info and other helper functions.
 #include "addons/RTDBHelper.h"
 
-#define RST_PIN   4     // Configurable, see typical pin layout above
-#define SS_PIN    5    // Configurable, see typical pin layout above
+#define RST_PIN   4     
+#define SS_PIN    5    
 
 // Firebase project API Key and project ID
 #define API_KEY "AIzaSyA4lUrWmolLy7TReQt3XLjsCE_o_kWFpto"
@@ -128,6 +128,7 @@ void initComs() {
 
 }
 
+// Get date and time
 void setupDateTime() {
   DateTime.setTimeZone("UTC-1");
   DateTime.setServer("pt.pool.ntp.org");
@@ -181,7 +182,6 @@ void setup() {
   // Initialize time server
   setupDateTime();
   
-
   // Assign API key
   config.api_key = API_KEY;
 
@@ -215,7 +215,7 @@ void setup() {
   Serial.print("User UID: ");
   Serial.println(uid);
 
- }
+}
 
 void loop() {
 
@@ -227,48 +227,48 @@ void loop() {
       tag += rfid.uid.uidByte[i]; // Build tag string
     }
  
-  Serial.println("Tag: " + tag);
+    Serial.println("Tag: " + tag);
 
-  // Update database path with MFRC522 readings
-  tagPath = "tags/" + tag; // tags/<tag_id>
+    // Update database path with MFRC522 readings
+    tagPath = "tags/" + tag; // tags/<tag_id>
 
-  // Variables to store item status
-  String status = "IN";
+    // Variables to store item status
+    String status = "IN";
 
-  if (Firebase.ready() && DateTime.isTimeValid()) {
-    // Gets tag status info from Firestore database
-    Serial.print("Search for document... ");
-    if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
-      Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+    if (Firebase.ready() && DateTime.isTimeValid()) {
+      // Gets tag status info from Firestore database
+      Serial.print("Search for document... ");
+      if (Firebase.Firestore.getDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "")) {
+        Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
 
-      // Create a FirebaseJson object and set content with received payload
-      FirebaseJson payload;
-      payload.setJsonData(fbdo.payload().c_str());
+        // Create a FirebaseJson object and set content with received payload
+        FirebaseJson payload;
+        payload.setJsonData(fbdo.payload().c_str());
 
-      // Get the data from FirebaseJson object 
-      FirebaseJsonData jsonData;
-      payload.get(jsonData, "fields/Status/stringValue", true);
-      
-      // Deletes tag if it is already in the Fitting Room
-      if(jsonData.stringValue == "IN"){
-        status = "OUT";
-        Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "");
-        delay(1000);
+        // Get the data from FirebaseJson object 
+        FirebaseJsonData jsonData;
+        payload.get(jsonData, "fields/Status/stringValue", true);
+        
+        // Deletes tag if it is already in the Fitting Room
+        if(jsonData.stringValue == "IN"){
+          status = "OUT";
+          Firebase.Firestore.deleteDocument(&fbdo, FIREBASE_PROJECT_ID, "", tagPath.c_str(), "");
+          delay(1000);
+        }
+      } else {
+        Serial.println(fbdo.errorReason());
       }
-    } else {
-      Serial.println(fbdo.errorReason());
+
+      // Send data to Firestore
+      if (status == "IN"){
+        sendData(tag, status);
+      }
     }
 
-    // Send data to Firestore
-    if (status == "IN"){
-      sendData(tag, status);
-    }
+    delay(500);
+    rfid.PICC_HaltA();          // Stop MFRC522 from reading
+    rfid.PCD_StopCrypto1();   // Stop encryption on PCD
+    tag="";                 // Resets tag string
+    
   }
-
-  delay(500);
-  rfid.PICC_HaltA();          // Stop MFRC522 from reading
-  rfid.PCD_StopCrypto1();   // Stop encryption on PCD
-  tag="";                 // Resets tag string
-  
-}
 }
