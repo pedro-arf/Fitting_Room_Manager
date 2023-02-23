@@ -48,7 +48,7 @@ After getting the data ready, it's time to send it to Firebase. As I've mentione
 <img src="https://i.imgur.com/P26BYY1.png" alt="Firebase Database" height="350"/>
 
 
-### Flutter Mobile App
+### Flutter Mobile App (fr_control)
 
 The app, as I've mentioned before, has authentication to let the user register and get access to the fitting room database. 
 
