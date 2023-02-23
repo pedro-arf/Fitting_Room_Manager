@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This project aims to mock how a smart fitting room would work and consists in two parts. The first part consists in connecting a Feather HUZZAH (ESP8266 WiFi microcontroller) to an RFID reader (RC522) and send the information stored in the tags that will mock pieces of clothing to a Google Firebase database. 
+This project aims to mock how a smart fitting room would work and can be divided in two parts. The first part consists in connecting a Feather HUZZAH (ESP8266 WiFi microcontroller) to an RFID reader (RC522) and send the information stored in the tags that will mock pieces of clothing to a Google Firebase database. 
 
 The tag information will be stored only if it is a new one, meaning that if the information about a particular tag is already stored in the fitting room database and the device reads the same one, this tag will be erased from the database. This happens because we can assume that a particular piece of clothing left the fitting room if the device reads the same id for the second time.
 
@@ -54,8 +54,13 @@ The app, as I've mentioned before, has authentication to let the user register a
 
 <img src="https://i.imgur.com/CmsRISt.jpg" alt="Login" height="400"/> <img src="https://i.imgur.com/cBNfoci.jpg" alt="Register" height="400"/>
 
-After logging in, the main screen is presented to the user. This screen tells you how many items are in the fitting room as well as the name of the product, id, size, price and time that it has spent inside of the fitting room. If an item is in the fitting room for 24 hours or more, the timer is replaced by a warning.
+After logging in, the main screen is presented to the user. This screen tells you how many items are in the fitting room as well as the name of the product, id, size, price and time that it has spent inside of the fitting room. All of this is done by fetching the data sent by the ESP8266 to the Google Firebase database.
+
+If an item is in the fitting room for 24 hours or more, the timer is replaced by a warning.
 
 <img src="https://imgur.com/7ND3t4Y.jpg" alt="Main Screen 1" height="400"> <img src="https://i.imgur.com/sGqFssy.jpg" alt="Main Screen 2" height="400"/>
 
 Every 30 minutes an item spends in the fitting room, a notification will pop up to remind the user to check it. This way the fitting room will always be clean and ready to use.
+
+<img src="https://imgur.com/FhfnyEn.jpg" alt="Main Screen 3" height="400"/>
+
